@@ -1,16 +1,33 @@
 #!/usr/bin/env node -r ts-node/register
 
-// コマンドライン引数をチェック
-const args = process.argv.slice(2);
-const useNanoseconds = args.includes("ns");
+import { CommandLineParser } from "./cli/CommandLineParser.js";
+import { TimeService } from "./services/TimeService.js";
 
-if (useNanoseconds) {
-  // ナノ秒単位のUNIX時間
-  // Date.now()はミリ秒単位なので、10^6を掛けてナノ秒に変換
-  const timeInNanoseconds = BigInt(Date.now()) * BigInt(1000000);
-  console.log(timeInNanoseconds.toString());
-} else {
-  // 秒単位のUNIX時間
-  const timeInSeconds = Math.floor(Date.now() / 1000);
-  console.log(timeInSeconds);
+/**
+ * CLIアプリケーションのメインクラス
+ */
+class UnixTimeApp {
+  private readonly parser: CommandLineParser;
+  private readonly timeService: TimeService;
+
+  /**
+   * コンストラクタ
+   */
+  constructor() {
+    this.parser = new CommandLineParser();
+    this.timeService = new TimeService();
+  }
+
+  /**
+   * アプリケーションを実行
+   */
+  run(): void {
+    const useNanoseconds = this.parser.hasNanosecondsOption();
+    const time = this.timeService.getCurrentTime(useNanoseconds);
+    console.log(time.toString());
+  }
 }
+
+// アプリケーションを実行
+const app = new UnixTimeApp();
+app.run();
